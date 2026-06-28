@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+
+# TypeScript incremental build
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
