@@ -34,8 +34,15 @@ export const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as MyJwtPayload;
-    req.userId = decoded.userId;
-    next();
+
+    if (decoded) {
+      req.userId = decoded.userId;
+      next();
+    } else {
+      return res.status(403).json({
+        message: "You are not logged in.",
+      });
+    }
   } catch (error) {
     return res.status(401).json({
       message: "Invalid or expired token.",
