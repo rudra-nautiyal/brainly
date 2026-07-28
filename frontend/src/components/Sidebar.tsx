@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Logo } from "../icons/Logo";
 import { TwitterIcon } from "../icons/TwitterIcon";
 import { YoutubeIcon } from "../icons/YoutubeIcon";
 import { GridIcon } from "../icons/GridIcon";
 import { LogoutIcon } from "../icons/LogoutIcon";
 import { SidebarItem } from "./SidebarItem";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { logout } from "../lib/auth";
 
 export type ContentFilter = "all" | "twitter" | "youtube";
@@ -14,11 +16,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeFilter, onFilterChange }: SidebarProps) {
-  function handleLogout() {
-    if (window.confirm("Are you sure you want to log out?")) {
-      logout();
-    }
-  }
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   return (
     <aside className="h-screen bg-white border-r-4 border-[#101820] w-72 fixed left-0 top-0 flex flex-col p-6 z-40 select-none">
@@ -61,9 +59,19 @@ export function Sidebar({ activeFilter, onFilterChange }: SidebarProps) {
         <SidebarItem
           text="Log Out"
           icon={<LogoutIcon />}
-          onClick={handleLogout}
+          onClick={() => setConfirmLogoutOpen(true)}
         />
       </div>
+
+      <ConfirmDialog
+        open={confirmLogoutOpen}
+        title="Log out?"
+        description="You'll need to sign in again to get back to your brain."
+        confirmText="Log Out"
+        danger
+        onConfirm={logout}
+        onCancel={() => setConfirmLogoutOpen(false)}
+      />
     </aside>
   );
 }

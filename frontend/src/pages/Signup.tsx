@@ -1,5 +1,6 @@
 // src/pages/Signup.tsx
 import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { http } from "../lib/http";
@@ -117,8 +118,13 @@ export function Signup() {
         username,
         password,
       });
-      alert("You have signed up successfully! Please log in.");
-      window.location.href = "/signin";
+      toast.success("You have signed up successfully! Please log in.");
+      // alert() used to pause execution until the user clicked OK, giving
+      // them time to read it before the redirect. toast is non-blocking, so
+      // we give it a beat on screen before navigating away.
+      setTimeout(() => {
+        window.location.href = "/signin";
+      }, 1200);
     } catch (error: any) {
       // 2. Handle 400 Bad Request (Zod Validation)
       if (error.response?.data?.errors) {

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import toast from "react-hot-toast";
+
 import { Button } from "../components/Button";
 
 import { Card } from "../components/Card";
@@ -74,10 +76,10 @@ export function DashBoard() {
 
       await navigator.clipboard.writeText(shareUrl);
 
-      // Replace with a toast/snackbar if you have one available
-      alert(`Share link copied to clipboard:\n${shareUrl}`);
+      toast.success("Share link copied to clipboard!");
     } catch (error) {
       console.error("Failed to share brain:", error);
+      toast.error("Couldn't create a share link. Please try again.");
     }
   };
 
@@ -91,7 +93,7 @@ export function DashBoard() {
       await http.delete(`/api/v1/content/${id}`);
     } catch (error) {
       console.error("Failed to delete content:", error);
-      alert("Couldn't delete that card. Please try again.");
+      toast.error("Couldn't delete that card. Please try again.");
       setContents(previousContents); // roll back on failure
     }
   };
@@ -106,7 +108,7 @@ export function DashBoard() {
       await http.patch(`/api/v1/content/${id}`, { note });
     } catch (error) {
       console.error("Failed to update note:", error);
-      alert("Couldn't save that note. Please try again.");
+      toast.error("Couldn't save that note. Please try again.");
       setContents(previousContents); // roll back on failure
     }
   };

@@ -1,5 +1,6 @@
 // src/components/CreateContentModal.tsx
 import { useRef, useState, forwardRef } from "react";
+import toast from "react-hot-toast";
 import { CrossIcon } from "../icons/CrossIcon";
 import { Button } from "./Button";
 import { http } from "../lib/http";
@@ -69,7 +70,7 @@ export function CreateContentModal({
     const note = noteRef.current?.value;
 
     if (!title || !link) {
-      alert("Please enter both a title and a link");
+      toast.error("Please enter both a title and a link");
       return;
     }
 
@@ -82,11 +83,12 @@ export function CreateContentModal({
         note: note || undefined,
       });
 
+      toast.success("Content added!");
       resetForm();
       onClose();
     } catch (error) {
       console.error("Error adding content", error);
-      alert("Failed to add content. Please try again.");
+      toast.error("Failed to add content. Please try again.");
     } finally {
       setIsLoading(false);
     }

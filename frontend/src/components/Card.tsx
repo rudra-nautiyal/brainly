@@ -4,6 +4,7 @@ import { ShareIcon } from "../icons/ShareIcon";
 import { TrashIcon } from "../icons/TrashIcon";
 import { PencilIcon } from "../icons/PencilIcon";
 import { CrossIcon } from "../icons/CrossIcon";
+import { loadTwitterWidgets } from "../lib/twitterWidgets";
 
 interface CardProps {
   id?: string;
@@ -33,10 +34,12 @@ export function Card({
     type === "youtube" ? link.replace("watch?v=", "embed/") : link;
 
   useEffect(() => {
-    // Re-trigger Twitter's widget script to load the tweet when a new card is added
-    if (type === "twitter" && (window as any).twttr?.widgets) {
-      (window as any).twttr.widgets.load();
-    }
+    // Make sure Twitter's widgets.js is actually loaded (it wasn't before),
+    // then ask it to render this tweet.
+    if (type !== "twitter") return;
+    loadTwitterWidgets().then(() => {
+      (window as any).twttr?.widgets?.load();
+    });
   }, [type, link]);
 
   // Keep the draft in sync if the underlying note changes elsewhere.
