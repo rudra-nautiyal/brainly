@@ -1,6 +1,13 @@
 import mongoose, { Types } from "mongoose";
 
-const contentTypes = ["image", "video", "article", "audio"];
+const contentTypes = [
+  "image",
+  "video",
+  "article",
+  "audio",
+  "youtube",
+  "twitter",
+];
 
 const contentSchema = new mongoose.Schema({
   link: { type: String, required: true },

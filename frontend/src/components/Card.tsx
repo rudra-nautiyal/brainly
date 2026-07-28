@@ -1,3 +1,4 @@
+// src/components/Card.tsx
 import { ShareIcon } from "../icons/ShareIcon";
 import { useEffect } from "react";
 
@@ -5,9 +6,10 @@ interface CardProps {
   title: string;
   link: string;
   type: "twitter" | "youtube";
+  note?: string; // <-- Added optional note property
 }
 
-export function Card({ title, link, type }: CardProps) {
+export function Card({ title, link, type, note }: CardProps) {
   // Convert YouTube standard link to embed link
   const embedLink =
     type === "youtube" ? link.replace("watch?v=", "embed/") : link;
@@ -41,7 +43,7 @@ export function Card({ title, link, type }: CardProps) {
       </div>
 
       {/* Embedded Content Area */}
-      <div className="w-full rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50 flex-1">
+      <div className="w-full rounded-xl overflow-hidden border-2 border-gray-100 bg-gray-50">
         {type === "youtube" && (
           <iframe
             className="aspect-video w-full"
@@ -54,13 +56,23 @@ export function Card({ title, link, type }: CardProps) {
         )}
 
         {type === "twitter" && (
-          <div className="p-2 w-full h-full flex justify-center items-center">
+          <div className="p-2 w-full flex justify-center items-center">
             <blockquote className="twitter-tweet" data-theme="light">
               <a href={link}></a>
             </blockquote>
           </div>
         )}
       </div>
+
+      {/* Note Display Area (Only shows if a note exists) */}
+      {note && (
+        <div className="bg-[#f4f5f6] border-2 border-[#101820] rounded-xl p-3 text-sm font-semibold text-[#101820] wrap-break-word">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+            Note
+          </p>
+          {note}
+        </div>
+      )}
     </div>
   );
 }
