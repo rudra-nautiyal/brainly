@@ -4,10 +4,12 @@ import { connectDB } from "./db.js";
 import userRouter from "./routes/user.route.js";
 import contentRouter from "./routes/content.route.js";
 import brainRouter from "./routes/brain.route.js";
+import cors from "cors";
 
 const app = express();
 const PORT = Number(process.env.PORT);
 
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1", userRouter);

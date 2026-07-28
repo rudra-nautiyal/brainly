@@ -1,7 +1,9 @@
 // src/pages/Signin.tsx
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import axios from "axios";
+import { BACKEND_URL } from "../config";
 
 // --- Icons ---
 
@@ -89,6 +91,78 @@ const EyeOffIcon = () => (
 
 export function Signin() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Error States
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [generalError, setGeneralError] = useState("");
+
+  const usernameRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  async function signin(e: React.FormEvent) {
+    e.preventDefault();
+
+    // 1. Reset all errors and start loading
+    setUsernameError("");
+    setPasswordError("");
+    setGeneralError("");
+    setIsLoading(true);
+
+    const username = usernameRef.current?.value;
+    const password = passwordRef.current?.value;
+
+    try {
+      const response = await axios.post(BACKEND_URL + "/api/v1/signin", {
+        username,
+        password,
+      });
+
+      // Store the JWT token (adjust "token" based on what your backend sends)
+      const jwt = response.data.token;
+      if (jwt) {
+        localStorage.setItem("token", jwt);
+        window.location.href = "/dashboard";
+      } else {
+        setGeneralError("Authentication succeeded, but no token was received.");
+      }
+    } catch (error: any) {
+      // 2. Handle Validation Errors (if backend sends 400 Bad Request)
+      if (error.response?.data?.errors) {
+        const errorMessages: string[] = error.response.data.errors;
+
+        errorMessages.forEach((msg) => {
+          const lowerMsg = msg.toLowerCase();
+          if (lowerMsg.includes("username")) {
+            setUsernameError(msg);
+          } else if (
+            lowerMsg.includes("password") ||
+            lowerMsg.includes("character")
+          ) {
+            setPasswordError(msg);
+          } else {
+            setGeneralError(msg);
+          }
+        });
+      }
+      // 3. Handle Unauthorized / Incorrect Credentials (usually 403 or 401)
+      else if (
+        error.response?.status === 403 ||
+        error.response?.status === 401
+      ) {
+        setGeneralError("Incorrect username or password.");
+      }
+      // 4. Fallback for specific backend messages or Network Errors
+      else if (error.response?.data?.message) {
+        setGeneralError(error.response.data.message);
+      } else {
+        setGeneralError("Log in failed. Please check your network connection.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen w-full bg-[#f4f5f6] flex flex-col justify-center items-center p-6">
@@ -112,11 +186,29 @@ export function Signin() {
           </div>
         </div>
 
+        {/* General Form Error (e.g., "Incorrect credentials") */}
+        {generalError && (
+          <div className="bg-red-50 border-2 border-red-500 text-red-700 px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            {generalError}
+          </div>
+        )}
+
         {/* Form Section */}
-        <form
-          className="flex flex-col gap-5"
-          onSubmit={(e) => e.preventDefault()}
-        >
+        <form className="flex flex-col gap-5" onSubmit={signin}>
           {/* Username / Email Field */}
           <div className="flex flex-col gap-1.5">
             <label
@@ -126,11 +218,23 @@ export function Signin() {
               Username
             </label>
             <Input
+              ref={usernameRef}
               id="username"
               placeholder="Enter your username"
               type="text"
               startIcon={<UserIcon />}
+              className={
+                usernameError
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  : ""
+              }
             />
+            {/* Display Username Error */}
+            {usernameError && (
+              <span className="text-sm text-red-500 font-semibold ml-1 flex items-center gap-1 mt-1">
+                {usernameError}
+              </span>
+            )}
           </div>
 
           {/* Password Field */}
@@ -150,10 +254,16 @@ export function Signin() {
               </a>
             </div>
             <Input
+              ref={passwordRef}
               id="password"
               placeholder="Enter your password"
               type={showPassword ? "text" : "password"}
               startIcon={<LockIcon />}
+              className={
+                passwordError
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                  : ""
+              }
               endIcon={
                 <button
                   type="button"
@@ -165,12 +275,18 @@ export function Signin() {
                 </button>
               }
             />
+            {/* Display Password Error */}
+            {passwordError && (
+              <span className="text-sm text-red-500 font-semibold ml-1 flex items-center gap-1 mt-1">
+                {passwordError}
+              </span>
+            )}
           </div>
 
           {/* Signin Button */}
           <div className="pt-2">
             <Button
-              loading={false}
+              loading={isLoading}
               variant="primary"
               text="Log In"
               fullWidth={true}
