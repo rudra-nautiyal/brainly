@@ -2,8 +2,7 @@
 import { useRef, useState } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
-import axios from "axios";
-import { BACKEND_URL } from "../config";
+import { http } from "../lib/http";
 
 // --- Icons ---
 
@@ -114,12 +113,12 @@ export function Signup() {
     const password = passwordRef.current?.value;
 
     try {
-      await axios.post(BACKEND_URL + "/api/v1/signup", {
+      await http.post("/api/v1/signup", {
         username,
         password,
       });
-      alert("You have signed up successfully!");
-      // Optionally redirect: window.location.href = "/signin";
+      alert("You have signed up successfully! Please log in.");
+      window.location.href = "/signin";
     } catch (error: any) {
       // 2. Handle 400 Bad Request (Zod Validation)
       if (error.response?.data?.errors) {

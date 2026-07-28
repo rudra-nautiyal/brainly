@@ -2,8 +2,7 @@
 import { useRef, useState, forwardRef } from "react";
 import { CrossIcon } from "../icons/CrossIcon";
 import { Button } from "./Button";
-import axios from "axios";
-import { BACKEND_URL } from "../config";
+import { http } from "../lib/http";
 
 // --- Icons ---
 const YoutubeIcon = () => (
@@ -50,10 +49,24 @@ export function CreateContentModal({
 
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+
+  function resetForm() {
+    if (titleRef.current) titleRef.current.value = "";
+    if (linkRef.current) linkRef.current.value = "";
+    if (noteRef.current) noteRef.current.value = "";
+    setType("youtube");
+  }
+
+  function handleClose() {
+    resetForm();
+    onClose();
+  }
 
   async function addContent() {
     const title = titleRef.current?.value;
     const link = linkRef.current?.value;
+    const note = noteRef.current?.value;
 
     if (!title || !link) {
       alert("Please enter both a title and a link");
@@ -62,16 +75,14 @@ export function CreateContentModal({
 
     try {
       setIsLoading(true);
-      await axios.post(
-        `${BACKEND_URL}/api/v1/content`,
-        { link, type, title },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      await http.post("/api/v1/content", {
+        link,
+        type,
+        title,
+        note: note || undefined,
+      });
 
+      resetForm();
       onClose();
     } catch (error) {
       console.error("Error adding content", error);
@@ -85,7 +96,7 @@ export function CreateContentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101820]/60 backdrop-blur-sm">
-      <div className="absolute inset-0" onClick={onClose} />
+      <div className="absolute inset-0" onClick={handleClose} />
 
       <div className="relative z-10 w-full max-w-md bg-white rounded-2xl border-4 border-[#101820] p-6 shadow-[8px_8px_0px_0px_rgba(16,24,32,1)] flex flex-col gap-5">
         <div className="flex justify-between items-center border-b-2 border-gray-100 pb-3">
@@ -93,7 +104,7 @@ export function CreateContentModal({
             Add New Link
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1 rounded-lg hover:bg-[#FEE715] hover:border-[#101820] border-2 border-transparent transition-all cursor-pointer text-gray-500 hover:text-[#101820]"
           >
             <CrossIcon />
@@ -154,6 +165,22 @@ export function CreateContentModal({
                     ? "Enter YouTube video URL"
                     : "Enter Tweet URL"
                 }
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-bold text-[#101820] ml-1">
+                Note{" "}
+                <span className="text-gray-400 font-semibold normal-case">
+                  (optional)
+                </span>
+              </label>
+              <textarea
+                ref={noteRef}
+                placeholder="Jot down why this is worth remembering..."
+                rows={3}
+                maxLength={2000}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-[#101820] rounded-xl font-semibold text-[#101820] outline-none transition-all resize-none focus:bg-white focus:shadow-[4px_4px_0px_0px_rgba(16,24,32,1)] focus:-translate-y-0.5 placeholder:text-gray-400 placeholder:font-medium"
               />
             </div>
           </div>

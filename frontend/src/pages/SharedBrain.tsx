@@ -12,6 +12,7 @@ interface Content {
   title: string;
   link: string;
   type: "twitter" | "youtube";
+  note?: string;
 }
 
 export function SharedBrain() {
@@ -75,8 +76,8 @@ export function SharedBrain() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max">
-          {contents.map(({ _id, type, link, title }) => (
-            <Card key={_id} type={type} link={link} title={title} />
+          {contents.map(({ _id, type, link, title, note }) => (
+            <Card key={_id} type={type} link={link} title={title} note={note} />
           ))}
 
           {contents.length === 0 && (

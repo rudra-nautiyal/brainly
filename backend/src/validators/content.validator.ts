@@ -16,6 +16,10 @@ export const contentSchema = z.object({
     .string()
     .min(3, "Title must be atleast 3 characters.")
     .max(20, "Title can be at max 20 characters"),
-  note: z.string().optional(), // <-- ADD THIS LINE HERE
+  note: z.string().max(2000, "Note can be at max 2000 characters.").optional(),
   tags: z.array(z.string()).optional(),
+});
+
+export const updateContentSchema = z.object({
+  note: z.string().max(2000, "Note can be at max 2000 characters.").optional(),
 });

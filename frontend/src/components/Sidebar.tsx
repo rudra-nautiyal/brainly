@@ -1,9 +1,25 @@
 import { Logo } from "../icons/Logo";
 import { TwitterIcon } from "../icons/TwitterIcon";
 import { YoutubeIcon } from "../icons/YoutubeIcon";
+import { GridIcon } from "../icons/GridIcon";
+import { LogoutIcon } from "../icons/LogoutIcon";
 import { SidebarItem } from "./SidebarItem";
+import { logout } from "../lib/auth";
 
-export function Sidebar() {
+export type ContentFilter = "all" | "twitter" | "youtube";
+
+interface SidebarProps {
+  activeFilter: ContentFilter;
+  onFilterChange: (filter: ContentFilter) => void;
+}
+
+export function Sidebar({ activeFilter, onFilterChange }: SidebarProps) {
+  function handleLogout() {
+    if (window.confirm("Are you sure you want to log out?")) {
+      logout();
+    }
+  }
+
   return (
     <aside className="h-screen bg-white border-r-4 border-[#101820] w-72 fixed left-0 top-0 flex flex-col p-6 z-40 select-none">
       {/* Sleek Brand Logo Header */}
@@ -20,9 +36,34 @@ export function Sidebar() {
 
       {/* Navigation Group */}
       <nav className="flex flex-col gap-2 pt-6 flex-1">
-        <SidebarItem text="Tweets" icon={<TwitterIcon />} />
-        <SidebarItem text="Youtube" icon={<YoutubeIcon />} />
+        <SidebarItem
+          text="All Notes"
+          icon={<GridIcon />}
+          active={activeFilter === "all"}
+          onClick={() => onFilterChange("all")}
+        />
+        <SidebarItem
+          text="Tweets"
+          icon={<TwitterIcon />}
+          active={activeFilter === "twitter"}
+          onClick={() => onFilterChange("twitter")}
+        />
+        <SidebarItem
+          text="Youtube"
+          icon={<YoutubeIcon />}
+          active={activeFilter === "youtube"}
+          onClick={() => onFilterChange("youtube")}
+        />
       </nav>
+
+      {/* Logout, pinned to the bottom */}
+      <div className="pt-4 border-t-2 border-gray-100">
+        <SidebarItem
+          text="Log Out"
+          icon={<LogoutIcon />}
+          onClick={handleLogout}
+        />
+      </div>
     </aside>
   );
 }
